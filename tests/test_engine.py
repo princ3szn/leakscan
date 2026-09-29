@@ -1,0 +1,50 @@
+from leakscan.engine import Scanner
+
+
+def fake_aws_key() -> str:
+    return "AKIA" + "IOSFODNN7EXAMPLE"
+
+
+def fake_github_token() -> str:
+    return "ghp_" + "Ab1" * 12
+
+
+def test_detects_aws_key_with_line_number():
+    text = 'region = "us-east-1"\nkey = "' + fake_aws_key() + '"\n'
+    findings = Scanner().scan_text(text, file="app.py")
+    assert len(findings) == 1
+    assert findings[0].rule_id == "aws-access-key-id"
+    assert findings[0].line == 2
+    assert fake_aws_key() not in findings[0].secret_redacted
+
+
+def test_github_token_reported_once():
+    text = 'token = "' + fake_github_token() + '"'
+    findings = Scanner().scan_text(text)
+    assert len(findings) == 1
+    assert findings[0].rule_id == "github-pat"
+
+
+def test_detects_private_key_header():
+    header = "-----BEGIN RSA " + "PRIVATE KEY-----"
+    findings = Scanner().scan_text(header)
+    assert [f.rule_id for f in findings] == ["private-key"]
+
+
+def test_flags_high_entropy_password_assignment():
+    findings = Scanner().scan_text('password = "k9Xv2LmQ7zTb4RwC"')
+    assert [f.rule_id for f in findings] == ["generic-secret-assignment"]
+
+
+def test_ignores_placeholder_and_low_entropy_values():
+    text = 'password = "your_password_here"\nsecret = "aaaaaaaaaa"'
+    assert Scanner().scan_text(text) == []
+
+
+def test_inline_ignore_comment_suppresses_finding():
+    text = 'key = "' + fake_aws_key() + '"  # leakscan:ignore'
+    assert Scanner().scan_text(text) == []
+
+
+def test_clean_text_has_no_findings():
+    assert Scanner().scan_text("print('hello world')") == []

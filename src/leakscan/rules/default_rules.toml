@@ -1,0 +1,64 @@
+[[rules]]
+id = "aws-access-key-id"
+description = "AWS access key ID"
+severity = "high"
+confidence = 0.9
+regex = '\b(?:AKIA|ASIA)[0-9A-Z]{16}\b'
+
+[[rules]]
+id = "github-pat"
+description = "GitHub personal access token"
+severity = "critical"
+confidence = 0.95
+regex = '\bghp_[A-Za-z0-9]{36}\b'
+
+[[rules]]
+id = "github-fine-grained-pat"
+description = "GitHub fine-grained personal access token"
+severity = "critical"
+confidence = 0.95
+regex = '\bgithub_pat_[A-Za-z0-9_]{22,255}\b'
+
+[[rules]]
+id = "stripe-live-key"
+description = "Stripe live secret or restricted key"
+severity = "critical"
+confidence = 0.95
+regex = '\b(?:sk|rk)_live_[0-9a-zA-Z]{24,}\b'
+
+[[rules]]
+id = "google-api-key"
+description = "Google API key"
+severity = "high"
+confidence = 0.85
+regex = '\bAIza[0-9A-Za-z_-]{35}\b'
+
+[[rules]]
+id = "slack-token"
+description = "Slack token"
+severity = "high"
+confidence = 0.9
+regex = '\bxox[baprs]-[0-9A-Za-z-]{10,}\b'
+
+[[rules]]
+id = "private-key"
+description = "Private key header"
+severity = "critical"
+confidence = 0.99
+regex = '-----BEGIN (?:RSA |EC |DSA |OPENSSH |PGP )?PRIVATE KEY(?: BLOCK)?-----'
+
+[[rules]]
+id = "jwt"
+description = "JSON Web Token"
+severity = "medium"
+confidence = 0.6
+regex = '\beyJ[A-Za-z0-9_-]{10,}\.eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\b'
+
+[[rules]]
+id = "generic-secret-assignment"
+description = "Hardcoded secret assigned to a suspicious variable name"
+severity = "medium"
+confidence = 0.5
+regex = '(?i)(?:api[_-]?key|secret|token|passwd|password|pwd)[\w.-]*[\x22\x27]?\s*[:=]\s*[\x22\x27]([^\x22\x27\s]{8,})[\x22\x27]'
+group = 1
+min_entropy = 3.0
