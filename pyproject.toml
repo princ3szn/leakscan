@@ -19,3 +19,5 @@ where = ["src"]
 testpaths = ["tests"]
 [tool.setuptools.package-data]
 leakscan = ["rules/*.toml"]
+[project.scripts]
+leakscan = "leakscan.cli:main"

@@ -9,6 +9,10 @@ def fake_github_token() -> str:
     return "ghp_" + "Ab1" * 12
 
 
+def fake_password() -> str:
+    return "k9Xv2LmQ" + "7zTb4RwC"
+
+
 def test_detects_aws_key_with_line_number():
     text = 'region = "us-east-1"\nkey = "' + fake_aws_key() + '"\n'
     findings = Scanner().scan_text(text, file="app.py")
@@ -32,7 +36,7 @@ def test_detects_private_key_header():
 
 
 def test_flags_high_entropy_password_assignment():
-    findings = Scanner().scan_text('password = "k9Xv2LmQ7zTb4RwC"')
+    findings = Scanner().scan_text('password = "' + fake_password() + '"')
     assert [f.rule_id for f in findings] == ["generic-secret-assignment"]
 
 
