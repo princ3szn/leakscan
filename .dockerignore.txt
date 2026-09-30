@@ -1,0 +1,8 @@
+.venv
+.git
+web
+tests
+benchmark
+__pycache__
+.pytest_cache
+*.egg-info
