@@ -12,6 +12,11 @@ PLACEHOLDER_MARKERS = (
     "example", "your", "changeme", "placeholder", "xxxx",
     "dummy", "sample", "<", "${", "{{",
 )
+# Values published in vendor documentation. They are never real credentials.
+KNOWN_EXAMPLES = {
+    "AKIA" + "IOSFODNN7EXAMPLE",
+    "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
+}
 IGNORE_MARKER = "leakscan:ignore"
 
 
@@ -51,7 +56,7 @@ def looks_like_placeholder(value: str) -> bool:
 class Scanner:
     def __init__(self, rules: list[Rule] | None = None):
         rules = rules if rules is not None else load_rules()
-        # Specific rules run first so the generic rule does not double-report.
+        # Specific rules run first so the generic rules do not double-report.
         self.rules = sorted(rules, key=lambda r: r.min_entropy is not None)
 
     def scan_text(
@@ -69,11 +74,11 @@ class Scanner:
             for rule in self.rules:
                 for match in rule.pattern.finditer(line):
                     secret = match.group(rule.group)
-                    if secret in seen:
+                    if secret in seen or secret in KNOWN_EXAMPLES:
                         continue
                     entropy = shannon_entropy(secret)
                     if rule.min_entropy is not None:
-                        if looks_like_placeholder(secret):
+                        if looks_like_placeholder(secret) or secret.isdigit():
                             continue
                         if entropy < rule.min_entropy:
                             continue

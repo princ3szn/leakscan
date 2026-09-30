@@ -19,8 +19,7 @@ def git(repo, *args):
 
 
 def fake_aws_key() -> str:
-    return "AKIA" + "IOSFODNN7EXAMPLE"
-
+    return "AKIA" + "QYZ3TWM5PXLK7B2D"
 
 def test_finds_secret_deleted_in_later_commit(tmp_path):
     git(tmp_path, "init")

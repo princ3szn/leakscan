@@ -6,7 +6,7 @@ from leakscan.walker import scan_path
 
 
 def fake_aws_key() -> str:
-    return "AKIA" + "IOSFODNN7EXAMPLE"
+    return "AKIA" + "QYZ3TWM5PXLK7B2D"
 
 
 def test_scan_path_finds_secret_in_nested_file(tmp_path):

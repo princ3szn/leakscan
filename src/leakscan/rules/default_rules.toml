@@ -31,14 +31,15 @@ id = "google-api-key"
 description = "Google API key"
 severity = "high"
 confidence = 0.85
-regex = '\bAIza[0-9A-Za-z_-]{35}\b'
+regex = '\bAIza[0-9A-Za-z_-]{35}(?![0-9A-Za-z_-])'
+
 
 [[rules]]
 id = "slack-token"
 description = "Slack token"
 severity = "high"
 confidence = 0.9
-regex = '\bxox[baprs]-[0-9A-Za-z-]{10,}\b'
+regex = '\bxox[baprs]-[0-9A-Za-z-]{10,}(?![0-9A-Za-z-])'
 
 [[rules]]
 id = "private-key"
@@ -52,7 +53,7 @@ id = "jwt"
 description = "JSON Web Token"
 severity = "medium"
 confidence = 0.6
-regex = '\beyJ[A-Za-z0-9_-]{10,}\.eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\b'
+regex = '\beyJ[A-Za-z0-9_-]{10,}\.eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}(?![A-Za-z0-9_-])'
 
 [[rules]]
 id = "generic-secret-assignment"
@@ -60,5 +61,23 @@ description = "Hardcoded secret assigned to a suspicious variable name"
 severity = "medium"
 confidence = 0.5
 regex = '(?i)(?:api[_-]?key|secret|token|passwd|password|pwd)[\w.-]*[\x22\x27]?\s*[:=]\s*[\x22\x27]([^\x22\x27\s]{8,})[\x22\x27]'
+group = 1
+min_entropy = 3.0
+
+[[rules]]
+id = "url-embedded-credentials"
+description = "Password embedded in a connection URL"
+severity = "high"
+confidence = 0.7
+regex = '[a-zA-Z][a-zA-Z0-9+.-]*://[^\s:@/]+:([^\s@/]{6,})@'
+group = 1
+min_entropy = 3.0
+
+[[rules]]
+id = "generic-unquoted-assignment"
+description = "Hardcoded secret in an unquoted KEY=value assignment"
+severity = "medium"
+confidence = 0.5
+regex = '^\s*(?:export\s+)?[A-Z0-9_]*(?:API_?KEY|SECRET|TOKEN|PASSWD|PASSWORD|PWD)[A-Z0-9_]*\s*=\s*([^\s\x22\x27#(){}$<>]{8,})\s*(?:#.*)?$'
 group = 1
 min_entropy = 3.0

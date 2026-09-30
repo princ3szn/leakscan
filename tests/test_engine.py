@@ -2,7 +2,7 @@ from leakscan.engine import Scanner
 
 
 def fake_aws_key() -> str:
-    return "AKIA" + "IOSFODNN7EXAMPLE"
+    return "AKIA" + "QYZ3TWM5PXLK7B2D"
 
 
 def fake_github_token() -> str:
@@ -52,3 +52,22 @@ def test_inline_ignore_comment_suppresses_finding():
 
 def test_clean_text_has_no_findings():
     assert Scanner().scan_text("print('hello world')") == []
+    
+def test_detects_password_in_connection_url():
+    text = "DATABASE_URL=postgres://admin:" + "k9Xv2LmQ" + "7zTb@db.host/app"
+    findings = Scanner().scan_text(text)
+    assert [f.rule_id for f in findings] == ["url-embedded-credentials"]
+
+
+def test_detects_unquoted_env_assignment():
+    findings = Scanner().scan_text("DB_PASSWORD=" + fake_password())
+    assert [f.rule_id for f in findings] == ["generic-unquoted-assignment"]
+
+
+def test_documented_example_key_is_ignored():
+    text = 'key = "' + "AKIA" + "IOSFODNN7EXAMPLE" + '"'
+    assert Scanner().scan_text(text) == []
+
+
+def test_numeric_only_value_is_ignored():
+    assert Scanner().scan_text('secret_length = "1234567890"') == []
