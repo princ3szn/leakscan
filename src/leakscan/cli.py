@@ -5,6 +5,7 @@ from dataclasses import asdict
 from pathlib import Path
 
 from .engine import Scanner
+from .gitscan import GitError, scan_history
 from .walker import scan_path
 
 
@@ -19,6 +20,10 @@ def build_parser() -> argparse.ArgumentParser:
         "--format", choices=["console", "json"], default="console",
         help="output format (default: console)",
     )
+    scan.add_argument(
+        "--history", action="store_true",
+        help="scan the full git history of the repository at PATH",
+    )
     return parser
 
 
@@ -27,9 +32,12 @@ def print_console(findings) -> None:
         print("No secrets found.")
         return
     for f in findings:
+        where = f"{f.file}:{f.line}"
+        if f.commit:
+            where += f" @ {f.commit}"
         print(
             f"[{f.severity.value.upper():8}] {f.rule_id:26} "
-            f"{f.file}:{f.line}  {f.secret_redacted}  (confidence {f.confidence:.2f})"
+            f"{where}  {f.secret_redacted}  (confidence {f.confidence:.2f})"
         )
     print(f"\n{len(findings)} potential secret(s) found.")
 
@@ -41,7 +49,15 @@ def main(argv: list[str] | None = None) -> int:
         print(f"error: path not found: {path}", file=sys.stderr)
         return 2
 
-    findings = scan_path(path, Scanner())
+    scanner = Scanner()
+    try:
+        if args.history:
+            findings = scan_history(path, scanner)
+        else:
+            findings = scan_path(path, scanner)
+    except GitError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 2
 
     if args.format == "json":
         payload = [{**asdict(f), "severity": f.severity.value} for f in findings]
