@@ -35,6 +35,8 @@ def iter_files(root: Path, max_size: int = MAX_FILE_SIZE) -> Iterator[Path]:
         dirnames[:] = [d for d in dirnames if d not in SKIP_DIRS]
         for name in filenames:
             path = Path(dirpath) / name
+            if path.is_symlink():
+                continue
             if name in SKIP_FILENAMES or path.suffix.lower() in SKIP_EXTENSIONS:
                 continue
             try:

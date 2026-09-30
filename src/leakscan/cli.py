@@ -6,6 +6,7 @@ from pathlib import Path
 
 from .engine import Scanner
 from .gitscan import GitError, scan_history
+from .remote import RemoteError, is_remote, shallow_clone
 from .reporters import to_sarif
 from .walker import scan_path
 
@@ -15,15 +16,17 @@ def build_parser() -> argparse.ArgumentParser:
         prog="leakscan", description="Scan for leaked secrets and credentials."
     )
     sub = parser.add_subparsers(dest="command", required=True)
-    scan = sub.add_parser("scan", help="scan a file or directory")
-    scan.add_argument("path", help="file or directory to scan")
+    scan = sub.add_parser("scan", help="scan a file, directory, or GitHub URL")
+    scan.add_argument(
+        "path", help="file, directory, or https://github.com/owner/repo URL"
+    )
     scan.add_argument(
         "--format", choices=["console", "json", "sarif"], default="console",
         help="output format (default: console)",
     )
     scan.add_argument(
         "--history", action="store_true",
-        help="scan the full git history of the repository at PATH",
+        help="scan the full git history (default branch only for URLs)",
     )
     return parser
 
@@ -43,20 +46,27 @@ def print_console(findings) -> None:
     print(f"\n{len(findings)} potential secret(s) found.")
 
 
+def run_scan(path: Path, scanner: Scanner, history: bool):
+    if history:
+        return scan_history(path, scanner)
+    return scan_path(path, scanner)
+
+
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
-    path = Path(args.path)
-    if not path.exists():
-        print(f"error: path not found: {path}", file=sys.stderr)
-        return 2
-
     scanner = Scanner()
+
     try:
-        if args.history:
-            findings = scan_history(path, scanner)
+        if is_remote(args.path):
+            with shallow_clone(args.path, full_history=args.history) as repo:
+                findings = run_scan(repo, scanner, args.history)
         else:
-            findings = scan_path(path, scanner)
-    except GitError as exc:
+            path = Path(args.path)
+            if not path.exists():
+                print(f"error: path not found: {path}", file=sys.stderr)
+                return 2
+            findings = run_scan(path, scanner, args.history)
+    except (GitError, RemoteError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 2
 
