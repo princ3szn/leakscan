@@ -62,10 +62,10 @@ def build_cases() -> list[Case]:
         pos("config.json", ["{", f'  "api_key": "{pw_json}"', "}"], {2}, "Generic api_key, JSON"),  # leakscan:ignore
         pos("secrets.yml", [f"secret: '{pw_yaml}'"], {1}, "Generic secret, YAML"),  # leakscan:ignore
         pos("auth.js", [f'const authToken = "{pw_js}";'], {1}, "Generic token, JS"),
-        # ---- real secrets (hard, expected misses today) ----
+        # ---- real secrets (hard) ----
         pos("weak_pw.py", [f'password = "{weak}"'], {1}, "hard: real but low-entropy password"),
         pos("db.env", [f"DB_PASSWORD={unquoted}"], {1}, "hard: unquoted password assignment"),
-        pos("conn.env", [f"DATABASE_URL=postgres://admin:{db_pw}@db.internal:5432/app"], {1}, "hard: password inside URL"),
+        pos("conn.env", ["DATABASE_URL=" + "postgres" + "://admin:" + db_pw + "@db.internal:5432/app"], {1}, "hard: password inside URL"),
         # ---- not secrets ----
         neg("placeholder.py", ['api_key = "your_api_key_here"'], "placeholder"),
         neg("vault.yaml", ['secret = "${SECRET_FROM_VAULT}"'], "template variable"),

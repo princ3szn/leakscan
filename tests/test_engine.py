@@ -52,9 +52,10 @@ def test_inline_ignore_comment_suppresses_finding():
 
 def test_clean_text_has_no_findings():
     assert Scanner().scan_text("print('hello world')") == []
-    
+
+
 def test_detects_password_in_connection_url():
-    text = "DATABASE_URL=postgres://admin:" + "k9Xv2LmQ" + "7zTb@db.host/app"
+    text = "DATABASE_URL=" + "postgres" + "://admin:" + "k9Xv2LmQ" + "7zTb@db.host/app"
     findings = Scanner().scan_text(text)
     assert [f.rule_id for f in findings] == ["url-embedded-credentials"]
 

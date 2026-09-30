@@ -6,6 +6,7 @@ from pathlib import Path
 
 from .engine import Scanner
 from .gitscan import GitError, scan_history
+from .reporters import to_sarif
 from .walker import scan_path
 
 
@@ -17,7 +18,7 @@ def build_parser() -> argparse.ArgumentParser:
     scan = sub.add_parser("scan", help="scan a file or directory")
     scan.add_argument("path", help="file or directory to scan")
     scan.add_argument(
-        "--format", choices=["console", "json"], default="console",
+        "--format", choices=["console", "json", "sarif"], default="console",
         help="output format (default: console)",
     )
     scan.add_argument(
@@ -62,6 +63,8 @@ def main(argv: list[str] | None = None) -> int:
     if args.format == "json":
         payload = [{**asdict(f), "severity": f.severity.value} for f in findings]
         print(json.dumps(payload, indent=2))
+    elif args.format == "sarif":
+        print(json.dumps(to_sarif(findings), indent=2))
     else:
         print_console(findings)
 
