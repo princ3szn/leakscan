@@ -254,7 +254,6 @@ export default function Home() {
     <>
       <Rain />
       <main className="shell">
-        <div className="pill"><i /> open source | pattern + entropy detection</div>
         <h1 className="glitch" data-text="leakscan">leakscan</h1>
         <p className="lead">
           Point it at a public GitHub repository. It hunts for committed API keys, tokens and
