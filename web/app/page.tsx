@@ -174,7 +174,7 @@ function Report({ result }: { result: ScanResult }) {
       </div>
 
       {clean ? (
-        <p className="okline">// nothing leaked. this repository is clean.</p>
+        <p className="okline">{"// nothing leaked. this repository is clean."}</p>
       ) : (
         <div className="card tablecard">
           <div className="tablehead">
