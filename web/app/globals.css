@@ -137,3 +137,7 @@ tr:last-child td { border-bottom: 0; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
 }
+.wake { margin-top: 1rem; padding: 0.7rem 1rem; color: var(--c); background: rgba(56, 189, 248, 0.08); border: 1px dashed rgba(56, 189, 248, 0.5); border-radius: 10px; font: 0.85rem var(--font-mono), monospace; animation: rise 0.4s both; }
+.foot { margin-top: 3rem; padding-top: 1.2rem; border-top: 1px solid var(--line); color: var(--muted); font: 0.8rem var(--font-mono), monospace; }
+.foot a { color: var(--g); text-decoration: none; }
+.foot a:hover { text-decoration: underline; }

@@ -210,8 +210,14 @@ export default function Home() {
   const [url, setUrl] = useState("");
   const [history, setHistory] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [slow, setSlow] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<ScanResult | null>(null);
+
+  // Wake the free-tier API as soon as the page opens, so the first scan is faster.
+  useEffect(() => {
+    fetch(`${API_URL}/health`).catch(() => {});
+  }, []);
 
   function spot(e: MouseEvent<HTMLElement>) {
     const r = e.currentTarget.getBoundingClientRect();
@@ -222,8 +228,10 @@ export default function Home() {
   async function runScan(e: FormEvent) {
     e.preventDefault();
     setLoading(true);
+    setSlow(false);
     setError(null);
     setResult(null);
+    const timer = window.setTimeout(() => setSlow(true), 7000);
     try {
       const res = await fetch(`${API_URL}/scan`, {
         method: "POST",
@@ -236,6 +244,8 @@ export default function Home() {
     } catch {
       setError("Could not reach the scanner API. Is it running?");
     } finally {
+      window.clearTimeout(timer);
+      setSlow(false);
       setLoading(false);
     }
   }
@@ -277,8 +287,21 @@ export default function Home() {
         </form>
 
         {loading && <Terminal history={history} />}
+        {loading && slow && (
+          <p className="wake" role="status">
+            Still working. If the server was idle it needs up to a minute to wake up (free
+            hosting), and large repositories take longer.
+          </p>
+        )}
         {error && <p className="error" role="alert">! {error}</p>}
         {result && <Report result={result} />}
+
+        <footer className="foot">
+          <a href="https://github.com/princ3szn/leakscan" target="_blank" rel="noreferrer">
+            view source on GitHub
+          </a>{" "}
+          | built by Prince Fumen Aminu
+        </footer>
       </main>
     </>
   );
